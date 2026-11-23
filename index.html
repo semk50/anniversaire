@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0e0b16">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Fuzzy+Bubbles:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>ALERT-ACTIVITY</title>
+</head>
+<body>
+    <div class="header">
+        <div class="header-infos">
+            <div id="date-actuelle"></div>
+            <div id="salutation-utilisateur"></div>
+        </div>
+        <button class="btn-coucou" id="btn-coucou" type="button">👋 Faire coucou</button>
+    </div>
+    <div class="affiche-programme">
+        <div class="affiche-tout" id="affiche-journal">
+            <h1 class="section-titre">Journal</h1>
+            <div class="journal-container">
+                <textarea class="champ-journal" placeholder="Qu'as-tu fait aujourd'hui ?"></textarea>
+                <button class="btn-ajout-journal">Ajouter au journal</button>
+                <div class="liste-journal"></div>
+            </div>
+        </div>
+        <div class="affiche-tache" id="affiche-taches">
+            <div class="a-faire">
+                <span>À faire</span>
+                <h2 id="nombre-a-faire">0</h2>
+            </div>
+            <div class="termine">
+                <span>Terminé</span>
+                <h2 id="nombre-termine">0</h2>
+            </div>
+            <div class="progression">
+                <span>Progression</span>
+                <h2 id="nombre-progression">0%</h2>
+            </div>
+            <div class="ajout-tache-container">
+                <input type="text" placeholder="Ajouter une nouvelle tache à faire" name="" class="champ-ajout">
+                <div class="rappel-tache">
+                    <label for="date-tache">Date du rappel</label>
+                    <input type="date" class="date-tache" id="date-tache">
+                    <label for="heure-tache">Heure du rappel</label>
+                    <input type="time" class="heure-tache" id="heure-tache">
+                    <small>Choisis une date et une heure pour recevoir un rappel.</small>
+                </div>
+                <button class="btn-ajout-taches">Ajouter</button>
+                <div class="notifications-actions">
+                    <span class="etat-notifications" id="etat-notifications">Les rappels nécessitent l’autorisation du navigateur.</span>
+                    <button class="btn-notifications" id="activer-notifications" type="button">Activer les notifications</button>
+                </div>
+                <div class="check-list">
+                    <!--afficher les taches--->
+                </div>
+            </div>
+        </div>
+        <div class="affiche-planing" id="affiche-planing">
+            <div class="affiche-planing-case"><!--afficher les programmes--></div>
+            <button class="btn-creer-planing">Ajouter</button>
+            <div class="ajout-planing-container">
+                <input type="text" placeholder="Ecrivis ce que tu as prévu de faire" class="champ-texte-planing" id="">
+                <div class="jour-heure">
+                    <div>
+                        <label for="time-planing">choisir l'heure</label>
+                        <input type="time" placeholder="Mettez l'heure du jour prévu" class="time-planing" name="" id="">
+                    </div>
+                    <div>
+                        <label for="date-planing">choisir la date</label>
+                        <input type="date" placeholder="La date" class="date-planing" name="" id="">
+                    </div>
+                </div>
+                <div class="palette-de-coleur-container">
+                    <!-- le couleurs à choisir seront affiché ici-->
+                </div>
+                <button class="btn-ajout-planing">Enregistrer</button>
+            </div>
+        </div>
+        <div class="affiche-reglage" id="affiche-reglage">
+            <h1 class="section-titre">Paramètres</h1>
+            <div class="reglage-container">
+                <label for="nom-utilisateur-reglage">Nom d’utilisateur</label>
+                <input type="text" id="nom-utilisateur-reglage" maxlength="24" autocomplete="nickname">
+            </div>
+            <div class="reglage-container">
+                <label for="theme-sombre">Mode sombre</label>
+                <input type="checkbox" id="theme-sombre" checked>
+            </div>
+            <div class="reglage-container">
+                <label for="rappels-actifs">Activer les rappels</label>
+                <input type="checkbox" id="rappels-actifs" checked>
+                <p class="note">Les rappels apparaissent à l’heure prévue si l’application est ouverte et si le navigateur les autorise.</p>
+                <span class="etat-notifications"></span>
+                <button class="btn-notifications" type="button">Autoriser les notifications</button>
+            </div>
+            <div class="reglage-container">
+                <h2>Installation</h2>
+                <p class="note etat-installation" id="etat-installation">Installe l’application sur ton appareil.</p>
+                <button class="btn-installer" id="btn-installer" type="button">Installer l’application</button>
+            </div>
+            <div class="reglage-container">
+                <button class="btn-effacer-terminees">Supprimer les tâches terminées</button>
+            </div>
+            <div class="reglage-container">
+                <button class="btn-effacer-donnees">Effacer les données locales</button>
+            </div>
+        </div>
+    </div>
+    <div class="container-btn">
+        <button class="btn-journal" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5z"/><path d="M5 4.5v17M9 6h7M9 10h7"/></svg>
+            <span>Journal</span>
+        </button>
+        <button class="btn-taches" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m7.5 12 3 3 6-7"/></svg>
+            <span>Tâches</span>
+        </button>
+        <button class="btn-planing" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/></svg>
+            <span>Programme</span>
+        </button>
+        <button class="btn-reglage" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 0 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 0 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 0 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 0 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 0 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 0 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 0 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 0 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9z"/></svg>
+            <span>Paramètres</span>
+        </button>
+    </div>
+    <div class="toast-coucou" id="toast-coucou" role="status" aria-live="polite"></div>
+    <dialog class="dialog-nom" id="dialog-nom">
+        <form id="form-nom">
+            <h2>Bienvenue !</h2>
+            <p>Choisis un nom d’utilisateur pour que l’application puisse te faire coucou.</p>
+            <label for="nom-utilisateur">Ton nom d’utilisateur</label>
+            <input type="text" id="nom-utilisateur" maxlength="24" autocomplete="nickname" required>
+            <button type="submit">Continuer</button>
+        </form>
+    </dialog>
+    <script src="main.js"></script>
+</body>
+</html>
