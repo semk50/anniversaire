@@ -396,9 +396,7 @@ class Rappels {
             await registration.showNotification("Rappel enregistré", {
                 body: `« ${element.texte} » est prévu le ${date.toLocaleString("fr-FR")}.`,
                 tag: `${element.id}-programme`,
-                icon: "./icon-192.png",
-                badge: "./badge-96.png",
-                image: "./icon-512.png",
+                icon: new URL("./icon-192.png", window.location.href).href,
                 data: { url: "./index.html" }
             });
         } catch (error) {
@@ -460,9 +458,7 @@ class Rappels {
                 await registration.showNotification(type === "tache" ? "Rappel de tâche" : "Rappel de programme", {
                     body: element.texte,
                     tag: element.id,
-                    icon: "./icon-192.png",
-                    badge: "./badge-96.png",
-                    image: "./icon-512.png",
+                    icon: new URL("./icon-192.png", window.location.href).href,
                     data: { url: "./index.html" }
                 });
             } catch (error) {
