@@ -128,31 +128,37 @@ class Taches {
 
         this.date.setCustomValidity("");
         this.heure.setCustomValidity("");
-        this.taches.push({
+        const tache = {
             id: creerId("tache"),
             texte,
             terminee: false,
             date: this.date.value,
             heure: this.heure.value,
             rappelEnvoye: false
-        });
+        };
+        this.taches.push(tache);
         this.champ.value = "";
         this.date.value = "";
         this.heure.value = "";
         this.sauvegarder();
         this.afficher();
+        document.dispatchEvent(new CustomEvent("rappel:modifie", {
+            detail: { type: "tache", id: tache.id, cree: true }
+        }));
     }
 
     supprimer(index) {
         this.taches.splice(index, 1);
         this.sauvegarder();
         this.afficher();
+        document.dispatchEvent(new CustomEvent("rappel:modifie"));
     }
 
     changerStatut(index, terminee) {
         this.taches[index].terminee = terminee;
         this.sauvegarder();
         this.afficher();
+        document.dispatchEvent(new CustomEvent("rappel:modifie"));
     }
 
     afficher() {
@@ -239,25 +245,30 @@ class Planing {
         }
         this.date.setCustomValidity("");
         this.heure.setCustomValidity("");
-        this.programmes.push({
+        const programme = {
             id: creerId("programme"),
             texte,
             heure: this.heure.value,
             date: this.date.value,
             rappelEnvoye: false
-        });
+        };
+        this.programmes.push(programme);
         this.texte.value = "";
         this.heure.value = "";
         this.date.value = "";
         this.conteneur.style.display = "none";
         this.sauvegarder();
         this.afficher();
+        document.dispatchEvent(new CustomEvent("rappel:modifie", {
+            detail: { type: "programme", id: programme.id, cree: true }
+        }));
     }
 
     supprimer(index) {
         this.programmes.splice(index, 1);
         this.sauvegarder();
         this.afficher();
+        document.dispatchEvent(new CustomEvent("rappel:modifie"));
     }
 
     afficher() {
@@ -293,10 +304,13 @@ class Rappels {
         this.interrupteur = document.querySelector("#rappels-actifs");
         this.actif = localStorage.getItem("rappelsActifs") !== "false";
         this.verificationEnCours = false;
+        this.timerRappel = null;
         if (this.interrupteur) this.interrupteur.checked = this.actif;
         this.boutons.forEach((bouton) => bouton.addEventListener("click", () => this.activer()));
+        document.addEventListener("rappel:modifie", (event) => this.gererChangement(event.detail));
         this.actualiserEtat();
         this.verifier();
+        this.armerProchainRappel();
         window.setInterval(() => this.verifier(), 15000);
         window.addEventListener("focus", () => this.verifier());
     }
@@ -361,6 +375,57 @@ class Rappels {
         localStorage.setItem("rappelsActifs", String(actif));
         this.actualiserEtat();
         if (actif) this.verifier();
+        else this.armerProchainRappel();
+    }
+
+    async gererChangement(detail) {
+        this.armerProchainRappel();
+        if (!detail || !detail.cree || !this.actif) return;
+
+        const elements = detail.type === "tache" ? this.taches.taches : this.planing.programmes;
+        const element = elements.find((item) => item.id === detail.id);
+        if (!element || !element.date || !element.heure) return;
+        if (!("Notification" in window) || Notification.permission !== "granted") {
+            this.afficherEtat("Rappel enregistré. Active les notifications pour recevoir la confirmation et l’alerte à l’échéance.");
+            return;
+        }
+
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const date = new Date(`${element.date}T${element.heure}`);
+            await registration.showNotification("Rappel enregistré", {
+                body: `« ${element.texte} » est prévu le ${date.toLocaleString("fr-FR")}.`,
+                tag: `${element.id}-programme`,
+                icon: "./icon-192.png",
+                badge: "./icon-192.png",
+                data: { url: "./index.html" }
+            });
+        } catch (error) {
+            this.afficherEtat(`Le rappel est enregistré, mais sa confirmation n’a pas pu être affichée : ${error.message}`);
+        }
+    }
+
+    armerProchainRappel() {
+        window.clearTimeout(this.timerRappel);
+        this.timerRappel = null;
+        if (!this.actif) return;
+
+        const maintenant = Date.now();
+        const prochains = [
+            ...this.taches.taches.filter((tache) => !tache.terminee && !tache.rappelEnvoye),
+            ...this.planing.programmes.filter((programme) => !programme.rappelEnvoye)
+        ].filter((item) => item.date && item.heure)
+            .map((item) => new Date(`${item.date}T${item.heure}`).getTime())
+            .filter((heure) => Number.isFinite(heure) && heure > maintenant)
+            .sort((a, b) => a - b);
+
+        if (prochains.length === 0) return;
+
+        const delai = Math.min(prochains[0] - maintenant, 2147483647);
+        this.timerRappel = window.setTimeout(() => {
+            this.verifier();
+            this.armerProchainRappel();
+        }, delai);
     }
 
     async verifier() {
@@ -376,6 +441,7 @@ class Rappels {
             this.afficherEtat(`Impossible de vérifier les rappels : ${error.message}`);
         } finally {
             this.verificationEnCours = false;
+            this.armerProchainRappel();
         }
     }
 
