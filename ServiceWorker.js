@@ -1,4 +1,4 @@
-const CACHE_NAME = "alert-activity-v2";
+const CACHE_NAME = "alert-activity-v3";
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -7,7 +7,8 @@ const ASSETS_TO_CACHE = [
     './manifest.json',
     './icon.svg',
     './icon-192.png',
-    './icon-512.png'
+    './icon-512.png',
+    './badge-96.png'
 ];
 
 self.addEventListener("install", (event) => {

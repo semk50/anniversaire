@@ -397,7 +397,7 @@ class Rappels {
                 body: `« ${element.texte} » est prévu le ${date.toLocaleString("fr-FR")}.`,
                 tag: `${element.id}-programme`,
                 icon: "./icon-192.png",
-                badge: "./icon-192.png",
+                badge: "./badge-96.png",
                 image: "./icon-512.png",
                 data: { url: "./index.html" }
             });
@@ -461,7 +461,7 @@ class Rappels {
                     body: element.texte,
                     tag: element.id,
                     icon: "./icon-192.png",
-                    badge: "./icon-192.png",
+                    badge: "./badge-96.png",
                     image: "./icon-512.png",
                     data: { url: "./index.html" }
                 });
