@@ -398,6 +398,7 @@ class Rappels {
                 tag: `${element.id}-programme`,
                 icon: "./icon-192.png",
                 badge: "./icon-192.png",
+                image: "./icon-512.png",
                 data: { url: "./index.html" }
             });
         } catch (error) {
@@ -461,6 +462,7 @@ class Rappels {
                     tag: element.id,
                     icon: "./icon-192.png",
                     badge: "./icon-192.png",
+                    image: "./icon-512.png",
                     data: { url: "./index.html" }
                 });
             } catch (error) {
