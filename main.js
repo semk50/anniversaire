@@ -292,6 +292,7 @@ class Rappels {
         this.etats = document.querySelectorAll(".etat-notifications");
         this.interrupteur = document.querySelector("#rappels-actifs");
         this.actif = localStorage.getItem("rappelsActifs") !== "false";
+        this.verificationEnCours = false;
         if (this.interrupteur) this.interrupteur.checked = this.actif;
         this.boutons.forEach((bouton) => bouton.addEventListener("click", () => this.activer()));
         this.actualiserEtat();
@@ -310,6 +311,13 @@ class Rappels {
         }
         if (!window.isSecureContext) {
             this.afficherEtat("Ouvre l’application en HTTPS ou sur localhost pour activer les notifications.");
+            return;
+        }
+        const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+        const installee = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+        if (ios && !installee) {
+            this.afficherEtat("Sur iPhone, ajoute d’abord l’application à l’écran d’accueil pour activer les notifications.");
             return;
         }
 
@@ -355,35 +363,47 @@ class Rappels {
         if (actif) this.verifier();
     }
 
-    verifier() {
-        if (!this.actif || !("Notification" in window) || Notification.permission !== "granted") return;
-        this.verifierListe(this.taches.taches, "tache", (item) => !item.terminee);
-        this.verifierListe(this.planing.programmes, "programme", () => true);
+    async verifier() {
+        if (!this.actif || !("Notification" in window) || Notification.permission !== "granted" ||
+            !("serviceWorker" in navigator) || this.verificationEnCours) return;
+
+        this.verificationEnCours = true;
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            await this.verifierListe(registration, this.taches.taches, "tache", (item) => !item.terminee);
+            await this.verifierListe(registration, this.planing.programmes, "programme", () => true);
+        } catch (error) {
+            this.afficherEtat(`Impossible de vérifier les rappels : ${error.message}`);
+        } finally {
+            this.verificationEnCours = false;
+        }
     }
 
-    verifierListe(elements, type, estActif) {
+    async verifierListe(registration, elements, type, estActif) {
         const maintenant = new Date();
-        elements.forEach((element) => {
-            if (element.rappelEnvoye || !element.date || !element.heure || !estActif(element)) return;
+        for (const element of elements) {
+            if (element.rappelEnvoye || !element.date || !element.heure || !estActif(element)) continue;
             const dateRappel = new Date(`${element.date}T${element.heure}`);
-            if (Number.isNaN(dateRappel.getTime()) || dateRappel > maintenant) return;
+            if (Number.isNaN(dateRappel.getTime()) || dateRappel > maintenant) continue;
 
+            element.rappelEnvoye = true;
+            if (type === "tache") this.taches.sauvegarder();
+            else this.planing.sauvegarder();
             try {
-                const notification = new Notification(type === "tache" ? "Rappel de tâche" : "Rappel de programme", {
+                await registration.showNotification(type === "tache" ? "Rappel de tâche" : "Rappel de programme", {
                     body: element.texte,
-                    tag: element.id
+                    tag: element.id,
+                    icon: "./icon-192.png",
+                    badge: "./icon-192.png",
+                    data: { url: "./index.html" }
                 });
-                notification.onclick = () => {
-                    window.focus();
-                    notification.close();
-                };
-                element.rappelEnvoye = true;
+            } catch (error) {
+                element.rappelEnvoye = false;
                 if (type === "tache") this.taches.sauvegarder();
                 else this.planing.sauvegarder();
-            } catch (error) {
-                this.etat.textContent = `Impossible d’afficher le rappel : ${error.message}`;
+                this.afficherEtat(`Impossible d’afficher le rappel : ${error.message}`);
             }
-        });
+        }
     }
 }
 
